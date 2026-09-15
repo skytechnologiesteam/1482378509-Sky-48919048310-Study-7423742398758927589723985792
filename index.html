@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sky Study</title>
+<style>
+  :root{
+    --sky-deep:#0b3d63;
+    --sky-mid:#1a6fa8;
+    --sky-bright:#4fb8e8;
+    --sky-pale:#eaf6fd;
+    --cloud:#ffffff;
+    --ink:#0c2536;
+    --ink-soft:#4d6b7d;
+    --line:#cfe7f4;
+    --danger:#c85a4a;
+    --radius:14px;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 20% -10%, #d8f0fb 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 0%, #cdeafb 0%, transparent 45%),
+      linear-gradient(180deg,#f3fbff 0%, #eaf6fd 40%, #e2f1fb 100%);
+    color:var(--ink);
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px clamp(16px,4vw,48px);
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand-mark{
+    width:40px;height:40px;
+    border-radius:12px;
+    background:linear-gradient(135deg,var(--sky-bright),var(--sky-mid));
+    position:relative;
+    box-shadow:0 6px 16px rgba(26,111,168,.35);
+    flex-shrink:0;
+  }
+  .brand-mark::before{
+    content:"";
+    position:absolute;
+    left:9px;top:15px;
+    width:22px;height:9px;
+    background:var(--cloud);
+    border-radius:99px;
+  }
+  .brand-mark::after{
+    content:"";
+    position:absolute;
+    left:15px;top:10px;
+    width:12px;height:12px;
+    background:var(--cloud);
+    border-radius:50%;
+  }
+  .brand-text .name{
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    color:var(--sky-deep);
+    line-height:1.1;
+  }
+  .brand-text .tag{
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+
+  .search-wrap{
+    position:relative;
+    flex:1 1 320px;
+    max-width:480px;
+  }
+  .search-wrap input{
+    width:100%;
+    padding:12px 16px 12px 40px;
+    border-radius:99px;
+    border:1.5px solid var(--line);
+    background:var(--cloud);
+    font-size:14.5px;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .search-wrap input:focus{
+    border-color:var(--sky-bright);
+    box-shadow:0 0 0 4px rgba(79,184,232,.18);
+  }
+  .search-wrap svg{
+    position:absolute;
+    left:14px;top:50%;
+    transform:translateY(-50%);
+    width:16px;height:16px;
+    stroke:var(--ink-soft);
+  }
+
+  /* ---------- Layout ---------- */
+  main{
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(280px,0.85fr);
+    gap:24px;
+    padding:0 clamp(16px,4vw,48px) 48px;
+    align-items:start;
+  }
+  @media (max-width:880px){
+    main{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--cloud);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:0 10px 30px rgba(20,80,120,.06);
+  }
+
+  /* ---------- Player ---------- */
+  .player-panel{padding:0; overflow:hidden;}
+  .player-stage{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+    background:linear-gradient(160deg,#062338,#0c3f61 60%,#12557f);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .player-stage video{
+    width:100%;height:100%;
+    object-fit:contain;
+    background:#020e18;
+    display:block;
+  }
+  .empty-stage{
+    text-align:center;
+    color:#bfe4f7;
+    padding:24px;
+  }
+  .empty-stage svg{width:40px;height:40px;stroke:#8fd0ee;margin-bottom:10px;}
+  .empty-stage p{margin:0;font-size:14px;color:#9dccdf;}
+  .empty-stage strong{display:block;color:#eaf8ff;font-size:16px;margin-bottom:4px;}
+
+  /* watermark */
+  .watermark{
+    position:absolute;
+    bottom:12px;
+    right:14px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 10px 5px 6px;
+    background:rgba(6,30,48,.45);
+    backdrop-filter:blur(3px);
+    border-radius:99px;
+    color:#eaf8ff;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:.01em;
+    pointer-events:none;
+    z-index:5;
+    opacity:.9;
+  }
+  .watermark .wm-dot{
+    width:16px;height:16px;
+    border-radius:6px;
+    background:linear-gradient(135deg,var(--sky-bright),var(--sky-mid));
+    position:relative;
+    flex-shrink:0;
+  }
+  .watermark .wm-dot::before{
+    content:"";
+    position:absolute;left:3px;top:6px;width:10px;height:4px;
+    background:#fff;border-radius:99px;
+  }
+
+  audio.native-fallback{display:none;}
+
+  /* custom controls */
+  .controls{
+    padding:12px 16px 16px;
+    background:var(--cloud);
+  }
+  .now-playing{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:10px;
+  }
+  .now-playing .title{
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--ink);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .now-playing .kind{
+    font-size:11.5px;
+    color:var(--sky-mid);
+    background:var(--sky-pale);
+    padding:3px 9px;
+    border-radius:99px;
+    flex-shrink:0;
+    font-weight:600;
+  }
+
+  .seek-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .time{
+    font-size:12px;
+    color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+    width:42px;
+    flex-shrink:0;
+  }
+  .time.end{text-align:right;}
+
+  input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    height:6px;
+    border-radius:99px;
+    background:var(--line);
+    outline:none;
+    flex:1;
+    cursor:pointer;
+  }
+  input[type="range"]#seek{
+    background:linear-gradient(90deg,var(--sky-mid) var(--progress,0%), var(--line) var(--progress,0%));
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:14px;height:14px;
+    border-radius:50%;
+    background:var(--sky-mid);
+    border:2px solid #fff;
+    box-shadow:0 1px 4px rgba(0,0,0,.25);
+    cursor:pointer;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:14px;height:14px;
+    border-radius:50%;
+    background:var(--sky-mid);
+    border:2px solid #fff;
+    cursor:pointer;
+  }
+
+  .btn-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .btn-row .left, .btn-row .right{
+    display:flex;align-items:center;gap:8px;
+  }
+  .ctrl-btn{
+    width:38px;height:38px;
+    border-radius:10px;
+    border:none;
+    background:var(--sky-pale);
+    color:var(--sky-deep);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:background .15s, transform .1s;
+    flex-shrink:0;
+  }
+  .ctrl-btn:hover{background:#d9effa;}
+  .ctrl-btn:active{transform:scale(.94);}
+  .ctrl-btn.play{
+    width:44px;height:44px;
+    background:linear-gradient(135deg,var(--sky-bright),var(--sky-mid));
+    color:#fff;
+  }
+  .ctrl-btn.play:hover{filter:brightness(1.05);}
+  .ctrl-btn svg{width:17px;height:17px;}
+  .ctrl-btn.play svg{width:19px;height:19px;}
+
+  .vol-wrap{display:flex;align-items:center;gap:6px;}
+  .vol-wrap input[type="range"]{width:70px;}
+
+  select#speed{
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    font-size:12.5px;
+    padding:6px 8px;
+    cursor:pointer;
+  }
+
+  /* ---------- Library ---------- */
+  .library-panel{padding:18px 18px 20px; max-height:82vh; display:flex; flex-direction:column;}
+  .library-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .library-head h2{
+    font-size:15px;
+    margin:0;
+    color:var(--sky-deep);
+  }
+  .count-pill{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    background:var(--sky-pale);
+    padding:3px 10px;
+    border-radius:99px;
+    font-weight:600;
+  }
+
+  .config-block{
+    border:1px dashed var(--line);
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:14px;
+    background:#f9fdff;
+  }
+  .config-block.hidden{display:none;}
+  .config-block label{
+    display:block;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin:8px 0 4px;
+    font-weight:600;
+  }
+  .config-block label:first-child{margin-top:0;}
+  .config-block input[type="text"]{
+    width:100%;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    font-size:13px;
+    outline:none;
+  }
+  .config-block input[type="text"]:focus{border-color:var(--sky-bright);}
+  .config-row{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .config-actions{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+  }
+  .btn{
+    border:none;
+    border-radius:9px;
+    padding:9px 14px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:filter .15s, transform .1s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn.primary{
+    background:linear-gradient(135deg,var(--sky-bright),var(--sky-mid));
+    color:#fff;
+    flex:1;
+  }
+  .btn.primary:hover{filter:brightness(1.06);}
+  .btn.ghost{
+    background:var(--sky-pale);
+    color:var(--sky-deep);
+  }
+  .btn.ghost:hover{background:#d9effa;}
+
+  .status-line{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:10px;
+    min-height:16px;
+  }
+  .status-line.error{color:var(--danger);}
+  .status-line.success{color:#2e8b57;}
+
+  .toggle-config{
+    background:none;
+    border:none;
+    color:var(--sky-mid);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    padding:0;
+    margin-bottom:12px;
+  }
+
+  .track-list{
+    list-style:none;
+    margin:0;padding:0;
+    overflow-y:auto;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .track-list::-webkit-scrollbar{width:6px;}
+  .track-list::-webkit-scrollbar-thumb{background:var(--line); border-radius:99px;}
+
+  .track-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:background .15s, border-color .15s;
+  }
+  .track-item:hover{background:var(--sky-pale);}
+  .track-item.active{
+    background:var(--sky-pale);
+    border-color:var(--sky-bright);
+  }
+  .track-icon{
+    width:34px;height:34px;
+    border-radius:9px;
+    background:linear-gradient(135deg,#dff2fb,#c7e7f8);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    color:var(--sky-mid);
+  }
+  .track-icon svg{width:16px;height:16px;}
+  .track-meta{min-width:0; flex:1;}
+  .track-name{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .track-type{
+    font-size:11px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+  .empty-list{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:30px 10px;
+  }
+
+  footer{
+    text-align:center;
+    padding:10px 16px 30px;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-text">
+      <div class="name">Sky Study</div>
+      <div class="tag">Your lecture library, in one clear sky</div>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <input id="searchInput" type="text" placeholder="Search your videos and audio…" autocomplete="off">
+  </div>
+</header>
+
+<main>
+  <!-- PLAYER -->
+  <section class="panel player-panel">
+    <div class="player-stage" id="playerStage">
+      <div class="empty-stage" id="emptyStage">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+        <strong>Nothing playing</strong>
+        <p>Pick something from the list to begin.</p>
+      </div>
+      <video id="videoEl" playsinline style="display:none;"></video>
+      <div class="watermark" id="watermark" style="display:none;">
+        <span class="wm-dot"></span> Sky Study
+      </div>
+    </div>
+    <audio id="audioEl" class="native-fallback"></audio>
+
+    <div class="controls" id="controls" style="display:none;">
+      <div class="now-playing">
+        <div class="title" id="nowTitle">—</div>
+        <div class="kind" id="nowKind">VIDEO</div>
+      </div>
+      <div class="seek-row">
+        <span class="time" id="timeCurrent">0:00</span>
+        <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
+        <span class="time end" id="timeDuration">0:00</span>
+      </div>
+      <div class="btn-row">
+        <div class="left">
+          <button class="ctrl-btn" id="rewindBtn" title="Back 10s">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          </button>
+          <button class="ctrl-btn play" id="playBtn" title="Play/Pause">
+            <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          </button>
+          <button class="ctrl-btn" id="forwardBtn" title="Forward 10s">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          </button>
+        </div>
+        <div class="right">
+          <select id="speed" title="Playback speed">
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+          </select>
+          <div class="vol-wrap">
+            <button class="ctrl-btn" id="muteBtn" title="Mute">
+              <svg id="volIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            </button>
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+          </div>
+          <button class="ctrl-btn" id="fullscreenBtn" title="Fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="panel library-panel">
+    <div class="library-head">
+      <h2>Library</h2>
+      <span class="count-pill" id="countPill"></span>
+    </div>
+
+    <ul class="track-list" id="trackList"></ul>
+  </section>
+</main>
+
+
+<!--
+  If this page is hosted on GitHub Pages (a "username.github.io" address),
+  everything below works with no changes.
+
+  If it's hosted anywhere else (for example Cloudflare Pages) with a GitHub
+  repository behind it, set data-repo below to "your-username/your-repo-name"
+  one time, and it will work the same way from then on.
+-->
+<script data-repo="" data-branch="main">
+(function(){
+  "use strict";
+
+  // Captured now, since document.currentScript is only valid while this
+  // script is first running (not later, inside functions/timeouts).
+  const thisScript = document.currentScript;
+
+  // ---------- State ----------
+  let allFiles = [];      // {name, displayName, type, url}
+  let filteredFiles = [];
+  let currentIndex = -1;
+
+  const el = (id) => document.getElementById(id);
+
+  const trackList = el('trackList');
+  const countPill = el('countPill');
+  const searchInput = el('searchInput');
+
+  const playerStage = el('playerStage');
+  const emptyStage = el('emptyStage');
+  const videoEl = el('videoEl');
+  const audioEl = el('audioEl');
+  const watermark = el('watermark');
+  const controls = el('controls');
+  const nowTitle = el('nowTitle');
+  const nowKind = el('nowKind');
+
+  const seek = el('seek');
+  const timeCurrent = el('timeCurrent');
+  const timeDuration = el('timeDuration');
+  const playBtn = el('playBtn');
+  const playIcon = el('playIcon');
+  const rewindBtn = el('rewindBtn');
+  const forwardBtn = el('forwardBtn');
+  const speedSel = el('speed');
+  const volume = el('volume');
+  const muteBtn = el('muteBtn');
+  const volIcon = el('volIcon');
+  const fullscreenBtn = el('fullscreenBtn');
+
+  // ---------- Helpers ----------
+  function cleanName(filename){
+    const dot = filename.lastIndexOf('.');
+    const base = dot > -1 ? filename.slice(0, dot) : filename;
+    return base.replace(/_/g, ' ').trim();
+  }
+
+  function extOf(filename){
+    const dot = filename.lastIndexOf('.');
+    return dot > -1 ? filename.slice(dot+1).toLowerCase() : '';
+  }
+
+  function fmtTime(sec){
+    if(!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec/60);
+    const s = Math.floor(sec%60);
+    return m + ':' + String(s).padStart(2,'0');
+  }
+
+  // ---------- Auto-scan this repository ----------
+  // This page figures out which GitHub repository it belongs to, then looks
+  // through that repository itself for video and audio files — nothing to
+  // type in, nothing to set up.
+  function detectRepo(){
+    const host = location.hostname;
+    const parts = location.pathname.split('/').filter(Boolean);
+
+    // Served directly from GitHub Pages: username.github.io/repo-name/...
+    if(host.endsWith('.github.io')){
+      return {
+        owner: host.split('.')[0],
+        repo: parts[0] || (host.split('.')[0] + '.github.io'),
+        branch: 'main'
+      };
+    }
+
+    // Served from Cloudflare Pages (or any other host) connected to a GitHub
+    // repo: this page's own <script> tag carries the repo pointer, set once
+    // when the site was created.
+    if(thisScript && thisScript.dataset && thisScript.dataset.repo){
+      const [owner, repo] = thisScript.dataset.repo.split('/');
+      if(owner && repo) return { owner, repo, branch: thisScript.dataset.branch || 'main' };
+    }
+    return null;
+  }
+
+  function toPlaybackUrl(owner, repo, branch, path){
+    return 'https://cdn.jsdelivr.net/gh/' + owner + '/' + repo + '@' + branch + '/' +
+      path.split('/').map(encodeURIComponent).join('/');
+  }
+
+  async function loadLibrary(){
+    const repo = detectRepo();
+    if(!repo || !repo.owner || !repo.repo) return;
+
+    try{
+      const apiUrl = 'https://api.github.com/repos/' + repo.owner + '/' + repo.repo +
+        '/git/trees/' + repo.branch + '?recursive=1';
+      const res = await fetch(apiUrl);
+      if(!res.ok) return;
+      const data = await res.json();
+      if(!Array.isArray(data.tree)) return;
+
+      allFiles = data.tree
+        .filter(item => item.type === 'blob' && /\.(mp4|m4a)$/i.test(item.path))
+        .map(item => {
+          const name = item.path.split('/').pop();
+          return {
+            name,
+            displayName: cleanName(name),
+            type: extOf(name) === 'mp4' ? 'video' : 'audio',
+            url: toPlaybackUrl(repo.owner, repo.repo, repo.branch, item.path)
+          };
+        })
+        .sort((a,b) => a.displayName.localeCompare(b.displayName));
+
+      applyFilter();
+    }catch(err){
+      // Quietly leave the library empty rather than surfacing technical errors.
+    }
+  }
+  loadLibrary();
+  window.addEventListener('focus', loadLibrary);
+
+  // ---------- Search ----------
+  function applyFilter(){
+    const q = searchInput.value.trim().toLowerCase();
+    filteredFiles = q ? allFiles.filter(f => f.displayName.toLowerCase().includes(q)) : allFiles.slice();
+    renderList();
+  }
+  searchInput.addEventListener('input', applyFilter);
+
+  function renderList(){
+    trackList.innerHTML = '';
+    countPill.textContent = allFiles.length ? (allFiles.length + ' file' + (allFiles.length===1?'':'s')) : '';
+
+    if(filteredFiles.length === 0){
+      const li = document.createElement('li');
+      li.className = 'empty-list';
+      li.textContent = allFiles.length === 0
+        ? 'Nothing here yet.'
+        : 'No matches.';
+      trackList.appendChild(li);
+      return;
+    }
+
+    filteredFiles.forEach((file) => {
+      const li = document.createElement('li');
+      li.className = 'track-item' + (currentIndex > -1 && allFiles[currentIndex] === file ? ' active' : '');
+      li.innerHTML =
+        '<div class="track-icon">' + (file.type === 'video' ? videoIconSvg() : audioIconSvg()) + '</div>' +
+        '<div class="track-meta">' +
+          '<div class="track-name">' + escapeHtml(file.displayName) + '</div>' +
+          '<div class="track-type">' + file.type + '</div>' +
+        '</div>';
+      li.addEventListener('click', () => playFile(file));
+      trackList.appendChild(li);
+    });
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function videoIconSvg(){
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"></rect><polygon points="22 8 17 12 22 16 22 8"></polygon></svg>';
+  }
+  function audioIconSvg(){
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>';
+  }
+
+  // ---------- Player ----------
+  function activeMediaEl(){
+    return videoEl.style.display !== 'none' ? videoEl : audioEl;
+  }
+
+  function playFile(file){
+    currentIndex = allFiles.indexOf(file);
+    emptyStage.style.display = 'none';
+    controls.style.display = 'block';
+    nowTitle.textContent = file.displayName;
+    nowKind.textContent = file.type.toUpperCase();
+
+    videoEl.pause();
+    audioEl.pause();
+
+    if(file.type === 'video'){
+      videoEl.style.display = 'block';
+      watermark.style.display = 'flex';
+      videoEl.src = file.url;
+      videoEl.currentTime = 0;
+      videoEl.play().catch(()=>{});
+    }else{
+      videoEl.style.display = 'none';
+      watermark.style.display = 'none';
+      audioEl.src = file.url;
+      audioEl.currentTime = 0;
+      audioEl.play().catch(()=>{});
+      // reuse the stage for an audio "now playing" look
+      showAudioStage(file);
+    }
+    bindMediaEvents();
+    renderList();
+  }
+
+  function showAudioStage(file){
+    // Simple branded audio backdrop while playing audio-only files
+    videoEl.style.display = 'none';
+  }
+
+  function bindMediaEvents(){
+    const m = activeMediaEl();
+    m.playbackRate = parseFloat(speedSel.value);
+    m.volume = parseFloat(volume.value);
+    updatePlayIcon(!m.paused);
+  }
+
+  function updatePlayIcon(isPlaying){
+    playIcon.innerHTML = isPlaying
+      ? '<rect x="5" y="3" width="5" height="18" rx="1"></rect><rect x="14" y="3" width="5" height="18" rx="1"></rect>'
+      : '<polygon points="6 3 20 12 6 21 6 3"></polygon>';
+  }
+
+  playBtn.addEventListener('click', () => {
+    const m = activeMediaEl();
+    if(!m.src) return;
+    if(m.paused){ m.play(); } else { m.pause(); }
+  });
+  rewindBtn.addEventListener('click', () => { const m = activeMediaEl(); m.currentTime = Math.max(0, m.currentTime - 10); });
+  forwardBtn.addEventListener('click', () => { const m = activeMediaEl(); m.currentTime = Math.min(m.duration||0, m.currentTime + 10); });
+
+  speedSel.addEventListener('change', () => { videoEl.playbackRate = audioEl.playbackRate = parseFloat(speedSel.value); });
+
+  volume.addEventListener('input', () => {
+    const v = parseFloat(volume.value);
+    videoEl.volume = audioEl.volume = v;
+    updateVolIcon(v);
+  });
+  muteBtn.addEventListener('click', () => {
+    const m = activeMediaEl();
+    m.muted = !m.muted;
+    updateVolIcon(m.muted ? 0 : m.volume);
+  });
+  function updateVolIcon(v){
+    volIcon.innerHTML = v === 0
+      ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>'
+      : '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+  }
+
+  fullscreenBtn.addEventListener('click', () => {
+    if(videoEl.style.display === 'none') return;
+    if(videoEl.requestFullscreen) videoEl.requestFullscreen();
+    else if(videoEl.webkitRequestFullscreen) videoEl.webkitRequestFullscreen();
+  });
+
+  [videoEl, audioEl].forEach(m => {
+    m.addEventListener('play', () => { if(activeMediaEl() === m) updatePlayIcon(true); });
+    m.addEventListener('pause', () => { if(activeMediaEl() === m) updatePlayIcon(false); });
+    m.addEventListener('timeupdate', () => {
+      if(activeMediaEl() !== m) return;
+      const pct = m.duration ? (m.currentTime / m.duration) * 100 : 0;
+      seek.value = pct;
+      seek.style.setProperty('--progress', pct + '%');
+      timeCurrent.textContent = fmtTime(m.currentTime);
+      timeDuration.textContent = fmtTime(m.duration);
+    });
+    m.addEventListener('ended', () => updatePlayIcon(false));
+    m.addEventListener('loadedmetadata', () => {
+      if(activeMediaEl() === m) timeDuration.textContent = fmtTime(m.duration);
+    });
+  });
+
+  seek.addEventListener('input', () => {
+    const m = activeMediaEl();
+    if(!m.duration) return;
+    m.currentTime = (parseFloat(seek.value) / 100) * m.duration;
+  });
+
+  // Init
+  updateVolIcon(1);
+})();
+</script>
+</body>
+</html>
