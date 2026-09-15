@@ -6,15 +6,16 @@
 <title>Sky Study</title>
 <style>
   :root{
-    --sky-deep:#0b3d63;
-    --sky-mid:#1a6fa8;
-    --sky-bright:#4fb8e8;
-    --sky-pale:#eaf6fd;
-    --cloud:#ffffff;
-    --ink:#0c2536;
-    --ink-soft:#4d6b7d;
-    --line:#cfe7f4;
-    --danger:#c85a4a;
+    --sky-deep:#eaf6fd;
+    --sky-mid:#4fb8e8;
+    --sky-bright:#7fd0f5;
+    --sky-pale:#16222c;
+    --cloud:#141b22;
+    --panel:#111820;
+    --ink:#e9f2f7;
+    --ink-soft:#8fa4b3;
+    --line:#233240;
+    --danger:#e0776a;
     --radius:14px;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
@@ -23,9 +24,9 @@
     margin:0;
     min-height:100vh;
     background:
-      radial-gradient(ellipse at 20% -10%, #d8f0fb 0%, transparent 55%),
-      radial-gradient(ellipse at 90% 0%, #cdeafb 0%, transparent 45%),
-      linear-gradient(180deg,#f3fbff 0%, #eaf6fd 40%, #e2f1fb 100%);
+      radial-gradient(ellipse at 20% -10%, #14232f 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 0%, #10202c 0%, transparent 45%),
+      linear-gradient(180deg,#0b1218 0%, #0d151c 40%, #0a1016 100%);
     color:var(--ink);
   }
 
@@ -48,7 +49,7 @@
     border-radius:12px;
     background:linear-gradient(135deg,var(--sky-bright),var(--sky-mid));
     position:relative;
-    box-shadow:0 6px 16px rgba(26,111,168,.35);
+    box-shadow:0 6px 16px rgba(79,184,232,.25);
     flex-shrink:0;
   }
   .brand-mark::before{
@@ -56,7 +57,7 @@
     position:absolute;
     left:9px;top:15px;
     width:22px;height:9px;
-    background:var(--cloud);
+    background:#0b1218;
     border-radius:99px;
   }
   .brand-mark::after{
@@ -64,7 +65,7 @@
     position:absolute;
     left:15px;top:10px;
     width:12px;height:12px;
-    background:var(--cloud);
+    background:#0b1218;
     border-radius:50%;
   }
   .brand-text .name{
@@ -89,15 +90,16 @@
     padding:12px 16px 12px 40px;
     border-radius:99px;
     border:1.5px solid var(--line);
-    background:var(--cloud);
+    background:var(--panel);
     font-size:14.5px;
     color:var(--ink);
     outline:none;
     transition:border-color .15s, box-shadow .15s;
   }
+  .search-wrap input::placeholder{color:var(--ink-soft);}
   .search-wrap input:focus{
     border-color:var(--sky-bright);
-    box-shadow:0 0 0 4px rgba(79,184,232,.18);
+    box-shadow:0 0 0 4px rgba(79,184,232,.15);
   }
   .search-wrap svg{
     position:absolute;
@@ -120,10 +122,10 @@
   }
 
   .panel{
-    background:var(--cloud);
+    background:var(--panel);
     border:1px solid var(--line);
     border-radius:var(--radius);
-    box-shadow:0 10px 30px rgba(20,80,120,.06);
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
   }
 
   /* ---------- Player ---------- */
@@ -132,26 +134,78 @@
     position:relative;
     width:100%;
     aspect-ratio:16/9;
-    background:linear-gradient(160deg,#062338,#0c3f61 60%,#12557f);
+    background:linear-gradient(160deg,#050c13,#0a1620 60%,#0d1f2c);
     display:flex;
     align-items:center;
     justify-content:center;
     overflow:hidden;
+    cursor:pointer;
+    user-select:none;
   }
   .player-stage video{
     width:100%;height:100%;
     object-fit:contain;
-    background:#020e18;
+    background:#020608;
     display:block;
+    pointer-events:none; /* clicks handled by stage wrapper */
   }
   .empty-stage{
     text-align:center;
-    color:#bfe4f7;
+    color:#7fa6bd;
     padding:24px;
+    cursor:default;
   }
-  .empty-stage svg{width:40px;height:40px;stroke:#8fd0ee;margin-bottom:10px;}
-  .empty-stage p{margin:0;font-size:14px;color:#9dccdf;}
-  .empty-stage strong{display:block;color:#eaf8ff;font-size:16px;margin-bottom:4px;}
+  .empty-stage svg{width:40px;height:40px;stroke:#4f7a92;margin-bottom:10px;}
+  .empty-stage p{margin:0;font-size:14px;color:#617f90;}
+  .empty-stage strong{display:block;color:#cfe8f5;font-size:16px;margin-bottom:4px;}
+
+  /* audio-only backdrop */
+  .audio-stage{
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    color:#cfe8f5;
+    pointer-events:none;
+  }
+  .audio-stage .audio-orb{
+    width:84px;height:84px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #2a4a5c, #0d1f2c 70%);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 8px rgba(79,184,232,.05);
+  }
+  .audio-stage .audio-orb svg{width:32px;height:32px;stroke:var(--sky-bright);}
+  .audio-stage .audio-title{
+    font-size:14px;
+    font-weight:600;
+    color:#dff2fb;
+    max-width:80%;
+    text-align:center;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  /* center play/pause glyph shown briefly on click */
+  .center-glyph{
+    position:absolute;
+    width:64px;height:64px;
+    border-radius:50%;
+    background:rgba(10,20,28,.55);
+    backdrop-filter:blur(2px);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+    transform:scale(.85);
+    z-index:6;
+  }
+  .center-glyph.show{opacity:1; transform:scale(1);}
+  .center-glyph svg{width:28px;height:28px;}
 
   /* watermark */
   .watermark{
@@ -162,7 +216,7 @@
     align-items:center;
     gap:6px;
     padding:5px 10px 5px 6px;
-    background:rgba(6,30,48,.45);
+    background:rgba(6,14,20,.55);
     backdrop-filter:blur(3px);
     border-radius:99px;
     color:#eaf8ff;
@@ -183,7 +237,7 @@
   .watermark .wm-dot::before{
     content:"";
     position:absolute;left:3px;top:6px;width:10px;height:4px;
-    background:#fff;border-radius:99px;
+    background:#0b1218;border-radius:99px;
   }
 
   audio.native-fallback{display:none;}
@@ -191,7 +245,7 @@
   /* custom controls */
   .controls{
     padding:12px 16px 16px;
-    background:var(--cloud);
+    background:var(--panel);
   }
   .now-playing{
     display:flex;
@@ -210,7 +264,7 @@
   }
   .now-playing .kind{
     font-size:11.5px;
-    color:var(--sky-mid);
+    color:var(--sky-bright);
     background:var(--sky-pale);
     padding:3px 9px;
     border-radius:99px;
@@ -250,16 +304,16 @@
     -webkit-appearance:none;
     width:14px;height:14px;
     border-radius:50%;
-    background:var(--sky-mid);
-    border:2px solid #fff;
-    box-shadow:0 1px 4px rgba(0,0,0,.25);
+    background:var(--sky-bright);
+    border:2px solid #0b1218;
+    box-shadow:0 1px 4px rgba(0,0,0,.5);
     cursor:pointer;
   }
   input[type="range"]::-moz-range-thumb{
     width:14px;height:14px;
     border-radius:50%;
-    background:var(--sky-mid);
-    border:2px solid #fff;
+    background:var(--sky-bright);
+    border:2px solid #0b1218;
     cursor:pointer;
   }
 
@@ -277,20 +331,20 @@
     border-radius:10px;
     border:none;
     background:var(--sky-pale);
-    color:var(--sky-deep);
+    color:var(--sky-bright);
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;
     transition:background .15s, transform .1s;
     flex-shrink:0;
   }
-  .ctrl-btn:hover{background:#d9effa;}
+  .ctrl-btn:hover{background:#1d2e3b;}
   .ctrl-btn:active{transform:scale(.94);}
   .ctrl-btn.play{
     width:44px;height:44px;
     background:linear-gradient(135deg,var(--sky-bright),var(--sky-mid));
-    color:#fff;
+    color:#0b1218;
   }
-  .ctrl-btn.play:hover{filter:brightness(1.05);}
+  .ctrl-btn.play:hover{filter:brightness(1.08);}
   .ctrl-btn svg{width:17px;height:17px;}
   .ctrl-btn.play svg{width:19px;height:19px;}
 
@@ -300,12 +354,48 @@
   select#speed{
     border:1.5px solid var(--line);
     border-radius:8px;
-    background:#fff;
+    background:var(--sky-pale);
     color:var(--ink);
     font-size:12.5px;
     padding:6px 8px;
     cursor:pointer;
   }
+
+  /* ---------- Fullscreen (custom) ---------- */
+  .player-stage.fs-active{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    width:100vw;
+    height:100vh;
+    aspect-ratio:auto;
+    border-radius:0;
+  }
+  .fs-controls-overlay{
+    display:none;
+    position:fixed;
+    left:0;right:0;bottom:0;
+    z-index:1001;
+    padding:14px clamp(14px,3vw,36px) 20px;
+    background:linear-gradient(0deg, rgba(4,10,15,.85), rgba(4,10,15,0));
+    pointer-events:auto;
+  }
+  body.fs-open{overflow:hidden;}
+  body.fs-open .fs-controls-overlay{display:block;}
+  .fs-exit-btn{
+    position:fixed;
+    top:16px;right:16px;
+    z-index:1002;
+    width:40px;height:40px;
+    border-radius:10px;
+    border:none;
+    background:rgba(10,20,28,.6);
+    color:#eaf8ff;
+    display:none;
+    align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  body.fs-open .fs-exit-btn{display:flex;}
 
   /* ---------- Library ---------- */
   .library-panel{padding:18px 18px 20px; max-height:82vh; display:flex; flex-direction:column;}
@@ -329,59 +419,6 @@
     font-weight:600;
   }
 
-  .config-block{
-    border:1px dashed var(--line);
-    border-radius:10px;
-    padding:12px;
-    margin-bottom:14px;
-    background:#f9fdff;
-  }
-  .config-block.hidden{display:none;}
-  .config-block label{
-    display:block;
-    font-size:11px;
-    color:var(--ink-soft);
-    margin:8px 0 4px;
-    font-weight:600;
-  }
-  .config-block label:first-child{margin-top:0;}
-  .config-block input[type="text"]{
-    width:100%;
-    padding:8px 10px;
-    border-radius:8px;
-    border:1.5px solid var(--line);
-    font-size:13px;
-    outline:none;
-  }
-  .config-block input[type="text"]:focus{border-color:var(--sky-bright);}
-  .config-row{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
-  .config-actions{
-    display:flex;
-    gap:8px;
-    margin-top:12px;
-  }
-  .btn{
-    border:none;
-    border-radius:9px;
-    padding:9px 14px;
-    font-size:13px;
-    font-weight:600;
-    cursor:pointer;
-    transition:filter .15s, transform .1s;
-  }
-  .btn:active{transform:scale(.97);}
-  .btn.primary{
-    background:linear-gradient(135deg,var(--sky-bright),var(--sky-mid));
-    color:#fff;
-    flex:1;
-  }
-  .btn.primary:hover{filter:brightness(1.06);}
-  .btn.ghost{
-    background:var(--sky-pale);
-    color:var(--sky-deep);
-  }
-  .btn.ghost:hover{background:#d9effa;}
-
   .status-line{
     font-size:12px;
     color:var(--ink-soft);
@@ -389,18 +426,7 @@
     min-height:16px;
   }
   .status-line.error{color:var(--danger);}
-  .status-line.success{color:#2e8b57;}
-
-  .toggle-config{
-    background:none;
-    border:none;
-    color:var(--sky-mid);
-    font-size:12px;
-    font-weight:600;
-    cursor:pointer;
-    padding:0;
-    margin-bottom:12px;
-  }
+  .status-line.success{color:#5fc98a;}
 
   .track-list{
     list-style:none;
@@ -427,15 +453,15 @@
   .track-item:hover{background:var(--sky-pale);}
   .track-item.active{
     background:var(--sky-pale);
-    border-color:var(--sky-bright);
+    border-color:var(--sky-mid);
   }
   .track-icon{
     width:34px;height:34px;
     border-radius:9px;
-    background:linear-gradient(135deg,#dff2fb,#c7e7f8);
+    background:linear-gradient(135deg,#1a2b36,#132029);
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
-    color:var(--sky-mid);
+    color:var(--sky-bright);
   }
   .track-icon svg{width:16px;height:16px;}
   .track-meta{min-width:0; flex:1;}
@@ -484,21 +510,34 @@
   </div>
 </header>
 
+<button class="fs-exit-btn" id="fsExitBtn" title="Exit fullscreen">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3m10-5h3v3a2 2 0 0 1-2 2h-3"></path></svg>
+</button>
+
 <main>
   <!-- PLAYER -->
   <section class="panel player-panel">
-    <div class="player-stage" id="playerStage">
+    <div class="player-stage" id="playerStage" oncontextmenu="return false;">
       <div class="empty-stage" id="emptyStage">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
         <strong>Nothing playing</strong>
         <p>Pick something from the list to begin.</p>
       </div>
-      <video id="videoEl" playsinline style="display:none;"></video>
+      <video id="videoEl" playsinline disablePictureInPicture controlsList="nodownload noremoteplayback noplaybackrate" style="display:none;"></video>
+      <div class="audio-stage" id="audioStage">
+        <div class="audio-orb">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        </div>
+        <div class="audio-title" id="audioStageTitle">—</div>
+      </div>
+      <div class="center-glyph" id="centerGlyph">
+        <svg id="centerIcon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+      </div>
       <div class="watermark" id="watermark" style="display:none;">
         <span class="wm-dot"></span> Sky Study
       </div>
     </div>
-    <audio id="audioEl" class="native-fallback"></audio>
+    <audio id="audioEl" class="native-fallback" controlsList="nodownload noremoteplayback" oncontextmenu="return false;"></audio>
 
     <div class="controls" id="controls" style="display:none;">
       <div class="now-playing">
@@ -576,6 +615,7 @@
   let allFiles = [];      // {name, displayName, type, url}
   let filteredFiles = [];
   let currentIndex = -1;
+  let glyphTimer = null;
 
   const el = (id) => document.getElementById(id);
 
@@ -587,7 +627,11 @@
   const emptyStage = el('emptyStage');
   const videoEl = el('videoEl');
   const audioEl = el('audioEl');
+  const audioStage = el('audioStage');
+  const audioStageTitle = el('audioStageTitle');
   const watermark = el('watermark');
+  const centerGlyph = el('centerGlyph');
+  const centerIcon = el('centerIcon');
   const controls = el('controls');
   const nowTitle = el('nowTitle');
   const nowKind = el('nowKind');
@@ -604,6 +648,10 @@
   const muteBtn = el('muteBtn');
   const volIcon = el('volIcon');
   const fullscreenBtn = el('fullscreenBtn');
+  const fsExitBtn = el('fsExitBtn');
+
+  const PLAY_SVG = '<polygon points="6 3 20 12 6 21 6 3"></polygon>';
+  const PAUSE_SVG = '<rect x="5" y="3" width="5" height="18" rx="1"></rect><rect x="14" y="3" width="5" height="18" rx="1"></rect>';
 
   // ---------- Helpers ----------
   function cleanName(filename){
@@ -625,14 +673,10 @@
   }
 
   // ---------- Auto-scan this repository ----------
-  // This page figures out which GitHub repository it belongs to, then looks
-  // through that repository itself for video and audio files — nothing to
-  // type in, nothing to set up.
   function detectRepo(){
     const host = location.hostname;
     const parts = location.pathname.split('/').filter(Boolean);
 
-    // Served directly from GitHub Pages: username.github.io/repo-name/...
     if(host.endsWith('.github.io')){
       return {
         owner: host.split('.')[0],
@@ -641,9 +685,6 @@
       };
     }
 
-    // Served from Cloudflare Pages (or any other host) connected to a GitHub
-    // repo: this page's own <script> tag carries the repo pointer, set once
-    // when the site was created.
     if(thisScript && thisScript.dataset && thisScript.dataset.repo){
       const [owner, repo] = thisScript.dataset.repo.split('/');
       if(owner && repo) return { owner, repo, branch: thisScript.dataset.branch || 'main' };
@@ -655,6 +696,10 @@
     return 'https://cdn.jsdelivr.net/gh/' + owner + '/' + repo + '@' + branch + '/' +
       path.split('/').map(encodeURIComponent).join('/');
   }
+
+  // both mp4 (video) and m4a/mp3 (audio) files are recognized
+  const AUDIO_EXTS = ['m4a', 'mp3', 'aac', 'wav', 'ogg'];
+  const VIDEO_EXTS = ['mp4', 'mov', 'webm'];
 
   async function loadLibrary(){
     const repo = detectRepo();
@@ -669,13 +714,19 @@
       if(!Array.isArray(data.tree)) return;
 
       allFiles = data.tree
-        .filter(item => item.type === 'blob' && /\.(mp4|m4a)$/i.test(item.path))
+        .filter(item => {
+          if(item.type !== 'blob') return false;
+          const ext = extOf(item.path);
+          return AUDIO_EXTS.includes(ext) || VIDEO_EXTS.includes(ext);
+        })
         .map(item => {
           const name = item.path.split('/').pop();
+          const ext = extOf(name);
           return {
             name,
             displayName: cleanName(name),
-            type: extOf(name) === 'mp4' ? 'video' : 'audio',
+            type: VIDEO_EXTS.includes(ext) ? 'video' : 'audio',
+            ext,
             url: toPlaybackUrl(repo.owner, repo.repo, repo.branch, item.path)
           };
         })
@@ -743,6 +794,35 @@
     return videoEl.style.display !== 'none' ? videoEl : audioEl;
   }
 
+  // Map file extension to a reasonably accurate MIME type so the browser's
+  // decoder picks the right path (helps m4a/aac in particular).
+  function mimeFor(ext){
+    switch(ext){
+      case 'mp4': return 'video/mp4';
+      case 'mov': return 'video/quicktime';
+      case 'webm': return 'video/webm';
+      case 'm4a': return 'audio/mp4';
+      case 'mp3': return 'audio/mpeg';
+      case 'aac': return 'audio/aac';
+      case 'wav': return 'audio/wav';
+      case 'ogg': return 'audio/ogg';
+      default: return '';
+    }
+  }
+
+  function setSourceOn(mediaEl, file){
+    // Clear any previous <source> children and set fresh ones with an
+    // explicit type, which is more reliable across browsers than relying
+    // on the file extension alone (this is what was breaking .m4a).
+    while(mediaEl.firstChild) mediaEl.removeChild(mediaEl.firstChild);
+    const source = document.createElement('source');
+    source.src = file.url;
+    const type = mimeFor(file.ext);
+    if(type) source.type = type;
+    mediaEl.appendChild(source);
+    mediaEl.load();
+  }
+
   function playFile(file){
     currentIndex = allFiles.indexOf(file);
     emptyStage.style.display = 'none';
@@ -755,26 +835,22 @@
 
     if(file.type === 'video'){
       videoEl.style.display = 'block';
+      audioStage.style.display = 'none';
       watermark.style.display = 'flex';
-      videoEl.src = file.url;
+      setSourceOn(videoEl, file);
       videoEl.currentTime = 0;
       videoEl.play().catch(()=>{});
     }else{
       videoEl.style.display = 'none';
-      watermark.style.display = 'none';
-      audioEl.src = file.url;
+      watermark.style.display = 'flex';
+      audioStage.style.display = 'flex';
+      audioStageTitle.textContent = file.displayName;
+      setSourceOn(audioEl, file);
       audioEl.currentTime = 0;
       audioEl.play().catch(()=>{});
-      // reuse the stage for an audio "now playing" look
-      showAudioStage(file);
     }
     bindMediaEvents();
     renderList();
-  }
-
-  function showAudioStage(file){
-    // Simple branded audio backdrop while playing audio-only files
-    videoEl.style.display = 'none';
   }
 
   function bindMediaEvents(){
@@ -785,27 +861,50 @@
   }
 
   function updatePlayIcon(isPlaying){
-    playIcon.innerHTML = isPlaying
-      ? '<rect x="5" y="3" width="5" height="18" rx="1"></rect><rect x="14" y="3" width="5" height="18" rx="1"></rect>'
-      : '<polygon points="6 3 20 12 6 21 6 3"></polygon>';
+    playIcon.innerHTML = isPlaying ? PAUSE_SVG : PLAY_SVG;
   }
 
-  playBtn.addEventListener('click', () => {
+  function togglePlay(){
     const m = activeMediaEl();
-    if(!m.src) return;
+    if(!m.src && !(m.querySelector && m.querySelector('source'))) return;
     if(m.paused){ m.play(); } else { m.pause(); }
-  });
-  rewindBtn.addEventListener('click', () => { const m = activeMediaEl(); m.currentTime = Math.max(0, m.currentTime - 10); });
-  forwardBtn.addEventListener('click', () => { const m = activeMediaEl(); m.currentTime = Math.min(m.duration||0, m.currentTime + 10); });
+    flashCenterGlyph(m.paused ? false : true);
+  }
 
+  function flashCenterGlyph(willPlay){
+    centerIcon.innerHTML = willPlay ? PLAY_SVG : PAUSE_SVG;
+    centerGlyph.classList.remove('show');
+    // force reflow so the animation restarts on rapid clicks
+    void centerGlyph.offsetWidth;
+    centerGlyph.classList.add('show');
+    clearTimeout(glyphTimer);
+    glyphTimer = setTimeout(() => centerGlyph.classList.remove('show'), 420);
+  }
+
+  playBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+
+  // Click anywhere on the player stage toggles play/pause (but not on the
+  // "nothing playing" empty state, and not when a click originated inside
+  // the controls bar underneath, which is a separate element already).
+  playerStage.addEventListener('click', (e) => {
+    if(currentIndex === -1) return;
+    togglePlay();
+  });
+
+  rewindBtn.addEventListener('click', (e) => { e.stopPropagation(); const m = activeMediaEl(); m.currentTime = Math.max(0, m.currentTime - 10); });
+  forwardBtn.addEventListener('click', (e) => { e.stopPropagation(); const m = activeMediaEl(); m.currentTime = Math.min(m.duration||0, m.currentTime + 10); });
+
+  speedSel.addEventListener('click', (e) => e.stopPropagation());
   speedSel.addEventListener('change', () => { videoEl.playbackRate = audioEl.playbackRate = parseFloat(speedSel.value); });
 
+  volume.addEventListener('click', (e) => e.stopPropagation());
   volume.addEventListener('input', () => {
     const v = parseFloat(volume.value);
     videoEl.volume = audioEl.volume = v;
     updateVolIcon(v);
   });
-  muteBtn.addEventListener('click', () => {
+  muteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     const m = activeMediaEl();
     m.muted = !m.muted;
     updateVolIcon(m.muted ? 0 : m.volume);
@@ -816,10 +915,19 @@
       : '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
   }
 
-  fullscreenBtn.addEventListener('click', () => {
-    if(videoEl.style.display === 'none') return;
-    if(videoEl.requestFullscreen) videoEl.requestFullscreen();
-    else if(videoEl.webkitRequestFullscreen) videoEl.webkitRequestFullscreen();
+  // ---------- Custom fullscreen (no native controls, no download affordance) ----------
+  function enterFullscreen(){
+    playerStage.classList.add('fs-active');
+    document.body.classList.add('fs-open');
+  }
+  function exitFullscreen(){
+    playerStage.classList.remove('fs-active');
+    document.body.classList.remove('fs-open');
+  }
+  fullscreenBtn.addEventListener('click', (e) => { e.stopPropagation(); enterFullscreen(); });
+  fsExitBtn.addEventListener('click', (e) => { e.stopPropagation(); exitFullscreen(); });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && document.body.classList.contains('fs-open')) exitFullscreen();
   });
 
   [videoEl, audioEl].forEach(m => {
@@ -839,11 +947,15 @@
     });
   });
 
+  seek.addEventListener('click', (e) => e.stopPropagation());
   seek.addEventListener('input', () => {
     const m = activeMediaEl();
     if(!m.duration) return;
     m.currentTime = (parseFloat(seek.value) / 100) * m.duration;
   });
+
+  // stop clicks inside the controls bar from bubbling to the stage toggle
+  controls.addEventListener('click', (e) => e.stopPropagation());
 
   // Init
   updateVolIcon(1);
